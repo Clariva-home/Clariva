@@ -1,0 +1,1813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clariva — Marketing Diagnostic Advisory</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+/* ── RESET & BASE ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; font-size: 16px; }
+
+:root {
+  --cream: #F8F6F1;
+  --white: #FFFFFF;
+  --ink: #1A1A18;
+  --ink-mid: #4A4A46;
+  --ink-light: #8A8A84;
+  --ink-faint: #C8C8C0;
+  --green: #2D6A4F;
+  --green-light: #D8F3DC;
+  --green-mid: #4A8C6A;
+  --border: #E4E2DA;
+  --border-dark: #C8C6BE;
+  --navy: #1A3A5C;
+  --red-light: #FADBD8;
+  --orange-light: #FEF0E7;
+
+  --font-display: 'Cormorant Garamond', serif;
+  --font-body: 'Outfit', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+body {
+  background: var(--cream);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-weight: 300;
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+
+/* Grain overlay */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 999;
+  opacity: 0.4;
+}
+
+/* ── TYPOGRAPHY ── */
+.display { font-family: var(--font-display); }
+.mono { font-family: var(--font-mono); }
+
+.label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--ink-light);
+}
+
+.label-green {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--green);
+}
+
+/* ── SCROLL ANIMATIONS ── */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.reveal-delay-1 { transition-delay: 0.1s; }
+.reveal-delay-2 { transition-delay: 0.2s; }
+.reveal-delay-3 { transition-delay: 0.3s; }
+.reveal-delay-4 { transition-delay: 0.4s; }
+
+/* ── NAV ── */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  padding: 24px 64px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background 0.3s, box-shadow 0.3s;
+}
+nav.scrolled {
+  background: rgba(248,246,241,0.95);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 1px 0 var(--border);
+}
+
+.nav-logo {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: 6px;
+  text-transform: uppercase;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.nav-links {
+  display: flex;
+  gap: 40px;
+  list-style: none;
+  align-items: center;
+}
+.nav-links a {
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--ink-mid);
+  text-decoration: none;
+  letter-spacing: 0.5px;
+  transition: color 0.2s;
+}
+.nav-links a:hover { color: var(--green); }
+
+.nav-cta {
+  background: var(--ink) !important;
+  color: var(--cream) !important;
+  padding: 10px 22px !important;
+  font-weight: 500 !important;
+  transition: background 0.2s !important;
+}
+.nav-cta:hover { background: var(--green) !important; color: white !important; }
+
+/* ── HERO ── */
+#hero {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 120px 64px 80px;
+  position: relative;
+  border-bottom: 1px solid var(--border);
+}
+
+.hero-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--green);
+  margin-bottom: 32px;
+  opacity: 0;
+  animation: fadeUp 0.8s ease 0.2s forwards;
+}
+
+.hero-headline {
+  font-family: var(--font-display);
+  font-size: clamp(52px, 7vw, 96px);
+  font-weight: 300;
+  line-height: 1.05;
+  color: var(--ink);
+  max-width: 900px;
+  margin-bottom: 40px;
+  opacity: 0;
+  animation: fadeUp 0.8s ease 0.4s forwards;
+}
+
+.hero-headline em {
+  font-style: italic;
+  color: var(--green);
+}
+
+.hero-sub {
+  font-size: 17px;
+  color: var(--ink-mid);
+  max-width: 520px;
+  line-height: 1.75;
+  margin-bottom: 56px;
+  font-weight: 300;
+  opacity: 0;
+  animation: fadeUp 0.8s ease 0.6s forwards;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  opacity: 0;
+  animation: fadeUp 0.8s ease 0.8s forwards;
+}
+
+.btn-primary {
+  background: var(--ink);
+  color: var(--cream);
+  padding: 14px 32px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  transition: background 0.25s;
+}
+.btn-primary:hover { background: var(--green); }
+
+.btn-secondary {
+  color: var(--ink-mid);
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: 0.5px;
+  text-decoration: none;
+  border-bottom: 1px solid var(--border-dark);
+  padding-bottom: 2px;
+  transition: color 0.2s, border-color 0.2s;
+}
+.btn-secondary:hover { color: var(--green); border-color: var(--green); }
+
+.hero-stats {
+  position: absolute;
+  bottom: 64px;
+  right: 64px;
+  display: flex;
+  gap: 48px;
+  opacity: 0;
+  animation: fadeUp 0.8s ease 1s forwards;
+}
+
+.hero-stat-num {
+  font-family: var(--font-display);
+  font-size: 40px;
+  font-weight: 500;
+  color: var(--ink);
+  display: block;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.hero-stat-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--ink-light);
+}
+
+@keyframes fadeUp {
+  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: translateY(20px); }
+}
+
+/* ── SECTIONS ── */
+section {
+  padding: 120px 64px;
+}
+
+.section-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 32px;
+  margin-bottom: 72px;
+}
+
+.section-num {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-faint);
+  letter-spacing: 2px;
+  padding-top: 6px;
+  flex-shrink: 0;
+}
+
+.section-title {
+  font-family: var(--font-display);
+  font-size: clamp(36px, 4vw, 56px);
+  font-weight: 300;
+  line-height: 1.15;
+  color: var(--ink);
+}
+
+.section-title em { font-style: italic; color: var(--green); }
+
+/* ── THE GAP ── */
+#gap {
+  background: var(--white);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.gap-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  margin-top: 48px;
+}
+
+.gap-cell {
+  background: var(--white);
+  padding: 40px 36px;
+}
+
+.gap-cell-icon {
+  font-size: 24px;
+  margin-bottom: 16px;
+}
+
+.gap-cell-title {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--ink);
+  margin-bottom: 12px;
+}
+
+.gap-cell-text {
+  font-size: 14px;
+  color: var(--ink-mid);
+  line-height: 1.75;
+  font-weight: 300;
+}
+
+/* ── HOW IT WORKS ── */
+#process {
+  background: var(--cream);
+}
+
+.process-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border: 1px solid var(--border);
+}
+
+.process-step {
+  display: grid;
+  grid-template-columns: 80px 1fr auto;
+  gap: 0;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.2s;
+  overflow: hidden;
+}
+.process-step:last-child { border-bottom: none; }
+.process-step:hover { background: var(--white); }
+
+.step-num {
+  font-family: var(--font-display);
+  font-size: 48px;
+  font-weight: 300;
+  color: var(--ink-faint);
+  padding: 32px 24px;
+  border-right: 1px solid var(--border);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  line-height: 1;
+}
+
+.step-body {
+  padding: 32px 40px;
+}
+
+.step-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--green);
+  margin-bottom: 10px;
+}
+
+.step-title {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 500;
+  color: var(--ink);
+  margin-bottom: 10px;
+}
+
+.step-desc {
+  font-size: 14px;
+  color: var(--ink-mid);
+  line-height: 1.75;
+  max-width: 520px;
+}
+
+.step-output {
+  padding: 32px 40px;
+  border-left: 1px solid var(--border);
+  min-width: 200px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.step-output-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 8px;
+}
+
+.step-output-val {
+  font-size: 13px;
+  color: var(--ink-mid);
+  line-height: 1.6;
+}
+
+/* ── FRAMEWORK ── */
+#framework {
+  background: var(--ink);
+  color: var(--cream);
+}
+
+#framework .section-title { color: var(--cream); }
+#framework .section-title em { color: #A8D5A2; }
+#framework .section-num { color: rgba(255,255,255,0.2); }
+
+.framework-intro {
+  font-size: 16px;
+  color: rgba(255,255,255,0.6);
+  max-width: 600px;
+  margin-bottom: 60px;
+  font-weight: 300;
+  line-height: 1.75;
+}
+
+.framework-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.fw-card {
+  background: #1E1E1C;
+  padding: 32px 28px;
+  transition: background 0.2s;
+}
+.fw-card:hover { background: #242422; }
+
+.fw-num {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: rgba(255,255,255,0.2);
+  letter-spacing: 2px;
+  margin-bottom: 12px;
+}
+
+.fw-title {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.9);
+  margin-bottom: 8px;
+  line-height: 1.3;
+}
+
+.fw-desc {
+  font-size: 12px;
+  color: rgba(255,255,255,0.45);
+  line-height: 1.75;
+  font-weight: 300;
+}
+
+.fw-phase-label {
+  grid-column: 1 / -1;
+  background: rgba(45,106,79,0.15);
+  border-bottom: 1px solid rgba(45,106,79,0.3);
+  padding: 12px 28px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: #A8D5A2;
+}
+
+/* ── CASE STUDIES ── */
+#cases {
+  background: var(--white);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.cases-intro {
+  font-size: 16px;
+  color: var(--ink-mid);
+  max-width: 560px;
+  margin-bottom: 64px;
+  line-height: 1.75;
+}
+
+.case-card {
+  border: 1px solid var(--border);
+  margin-bottom: 24px;
+  overflow: hidden;
+  transition: box-shadow 0.3s;
+}
+.case-card:hover { box-shadow: 0 8px 40px rgba(0,0,0,0.06); }
+
+.case-header {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: start;
+  padding: 40px 44px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  background: var(--white);
+  transition: background 0.2s;
+}
+.case-header:hover { background: var(--cream); }
+
+.case-tag {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--ink-light);
+  margin-bottom: 12px;
+}
+
+.case-title {
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 500;
+  color: var(--ink);
+  margin-bottom: 6px;
+}
+
+.case-subtitle {
+  font-size: 14px;
+  color: var(--ink-mid);
+  font-style: italic;
+  font-family: var(--font-display);
+}
+
+.case-toggle {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-light);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: 4px;
+  transition: color 0.2s;
+}
+
+.case-toggle .arrow {
+  display: inline-block;
+  transition: transform 0.3s;
+  font-size: 16px;
+}
+.case-card.open .case-toggle .arrow { transform: rotate(45deg); }
+.case-card.open .case-toggle { color: var(--green); }
+
+.case-body {
+  display: none;
+  padding: 0 44px;
+}
+.case-card.open .case-body { display: block; }
+
+.case-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  margin: 32px 0;
+}
+
+.kpi-cell {
+  background: var(--white);
+  padding: 24px 20px;
+  text-align: center;
+}
+
+.kpi-cell.highlight { background: #FDF2F1; }
+
+.kpi-num {
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 500;
+  color: var(--ink);
+  display: block;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+.kpi-num.red { color: #C0392B; }
+.kpi-num.green { color: var(--green); }
+
+.kpi-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--ink-light);
+  line-height: 1.4;
+}
+
+.case-finding {
+  background: var(--cream);
+  border-left: 3px solid var(--green);
+  padding: 20px 24px;
+  margin-bottom: 24px;
+}
+
+.finding-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--green);
+  margin-bottom: 8px;
+}
+
+.finding-text {
+  font-size: 14px;
+  color: var(--ink-mid);
+  line-height: 1.75;
+}
+.finding-text strong { color: var(--ink); font-weight: 500; }
+
+.case-layers {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.layer-item {
+  padding: 18px 20px;
+  border: 1px solid var(--border);
+  background: var(--white);
+}
+
+.layer-title {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--ink-light);
+  margin-bottom: 6px;
+}
+
+.layer-finding {
+  font-size: 13px;
+  color: var(--ink-mid);
+  line-height: 1.65;
+}
+.layer-finding strong { color: var(--ink); font-weight: 500; }
+
+.case-counterfactual {
+  background: var(--ink);
+  color: var(--cream);
+  padding: 32px 36px;
+  margin-bottom: 40px;
+}
+
+.cf-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.35);
+  margin-bottom: 14px;
+}
+
+.cf-text {
+  font-family: var(--font-display);
+  font-size: 18px;
+  color: rgba(255,255,255,0.85);
+  line-height: 1.65;
+  font-style: italic;
+}
+
+.cf-findings {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.cf-finding-item {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.cf-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #A8D5A2;
+  flex-shrink: 0;
+  margin-top: 8px;
+}
+
+.cf-finding-text {
+  font-size: 13px;
+  color: rgba(255,255,255,0.6);
+  line-height: 1.65;
+  font-weight: 300;
+}
+.cf-finding-text strong { color: rgba(255,255,255,0.85); font-weight: 500; }
+
+/* ── ICP ── */
+#icp {
+  background: var(--cream);
+}
+
+.icp-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  margin-top: 48px;
+}
+
+.icp-card {
+  padding: 36px;
+  border: 1px solid var(--border);
+  background: var(--white);
+}
+
+.icp-title {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--ink);
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.icp-items {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.icp-items li {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  font-size: 14px;
+  color: var(--ink-mid);
+  line-height: 1.6;
+}
+
+.icp-items li::before {
+  content: '—';
+  color: var(--green);
+  flex-shrink: 0;
+  font-weight: 500;
+}
+
+/* ── FAQ ── */
+#faq {
+  background: var(--white);
+  border-top: 1px solid var(--border);
+}
+
+.faq-list {
+  max-width: 760px;
+  margin-top: 0;
+}
+
+.faq-item {
+  border-bottom: 1px solid var(--border);
+}
+
+.faq-q {
+  padding: 24px 0;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--ink);
+  user-select: none;
+  transition: color 0.2s;
+}
+.faq-q:hover { color: var(--green); }
+
+.faq-icon {
+  font-family: var(--font-mono);
+  font-size: 20px;
+  color: var(--ink-light);
+  transition: transform 0.3s;
+  flex-shrink: 0;
+  line-height: 1;
+}
+.faq-item.open .faq-icon { transform: rotate(45deg); color: var(--green); }
+
+.faq-a {
+  display: none;
+  padding: 0 0 24px 0;
+  font-size: 14px;
+  color: var(--ink-mid);
+  line-height: 1.8;
+  font-weight: 300;
+  max-width: 640px;
+}
+.faq-item.open .faq-a { display: block; }
+.faq-a strong { color: var(--ink); font-weight: 500; }
+
+/* ── BOOKING ── */
+#book {
+  background: var(--ink);
+  color: var(--cream);
+  padding: 120px 64px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+#book::before {
+  content: '';
+  position: absolute;
+  top: -200px; right: -200px;
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(45,106,79,0.15) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.book-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: #A8D5A2;
+  margin-bottom: 24px;
+}
+
+.book-headline {
+  font-family: var(--font-display);
+  font-size: clamp(40px, 5vw, 72px);
+  font-weight: 300;
+  line-height: 1.1;
+  color: var(--cream);
+  margin-bottom: 24px;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.book-headline em { font-style: italic; color: #A8D5A2; }
+
+.book-sub {
+  font-size: 16px;
+  color: rgba(255,255,255,0.5);
+  max-width: 480px;
+  margin: 0 auto 48px;
+  line-height: 1.75;
+}
+
+.book-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  width: 100%;
+}
+
+.form-input {
+  width: 100%;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: var(--cream);
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 300;
+  padding: 14px 18px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.form-input::placeholder { color: rgba(255,255,255,0.3); }
+.form-input:focus { border-color: rgba(255,255,255,0.3); }
+
+.form-select {
+  width: 100%;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.7);
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 300;
+  padding: 14px 18px;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+}
+.form-select option { background: #2A2A28; color: white; }
+
+.form-textarea {
+  width: 100%;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: var(--cream);
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 300;
+  padding: 14px 18px;
+  outline: none;
+  resize: vertical;
+  min-height: 100px;
+  transition: border-color 0.2s;
+}
+.form-textarea::placeholder { color: rgba(255,255,255,0.3); }
+.form-textarea:focus { border-color: rgba(255,255,255,0.3); }
+
+.btn-submit {
+  width: 100%;
+  background: var(--green);
+  color: white;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 1px;
+  padding: 16px;
+  border: none;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: background 0.2s;
+}
+.btn-submit:hover { background: var(--green-mid); }
+
+.book-note {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: rgba(255,255,255,0.25);
+  letter-spacing: 1px;
+  margin-top: 12px;
+  text-align: center;
+}
+
+/* ── FOOTER ── */
+footer {
+  background: #141412;
+  color: rgba(255,255,255,0.4);
+  padding: 48px 64px;
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 48px;
+  margin-bottom: 40px;
+}
+
+.footer-logo {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 500;
+  letter-spacing: 6px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.7);
+  margin-bottom: 12px;
+}
+
+.footer-tagline {
+  font-size: 12px;
+  color: rgba(255,255,255,0.3);
+  line-height: 1.7;
+}
+
+.footer-col-title {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.3);
+  margin-bottom: 16px;
+}
+
+.footer-links {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.footer-links a {
+  font-size: 13px;
+  color: rgba(255,255,255,0.4);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.footer-links a:hover { color: rgba(255,255,255,0.8); }
+
+.footer-bottom {
+  border-top: 1px solid rgba(255,255,255,0.07);
+  padding-top: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  color: rgba(255,255,255,0.2);
+}
+
+/* Modal */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+}
+.modal-overlay.open { display: flex; }
+
+.modal {
+  background: var(--white);
+  max-width: 560px;
+  width: 90%;
+  padding: 48px;
+  position: relative;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.modal-close {
+  position: absolute;
+  top: 20px; right: 20px;
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: var(--ink-light);
+  font-family: var(--font-mono);
+  line-height: 1;
+}
+.modal-close:hover { color: var(--ink); }
+
+.modal-title {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 500;
+  color: var(--ink);
+  margin-bottom: 8px;
+}
+
+.modal-sub {
+  font-size: 13px;
+  color: var(--ink-light);
+  margin-bottom: 32px;
+  line-height: 1.6;
+}
+
+.modal-input {
+  width: 100%;
+  background: var(--cream);
+  border: 1px solid var(--border);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 14px;
+  padding: 13px 16px;
+  outline: none;
+  margin-bottom: 12px;
+  transition: border-color 0.2s;
+}
+.modal-input:focus { border-color: var(--green); }
+.modal-input::placeholder { color: var(--ink-faint); }
+
+.modal-btn {
+  width: 100%;
+  background: var(--ink);
+  color: var(--cream);
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  padding: 14px;
+  border: none;
+  cursor: pointer;
+  margin-top: 8px;
+  transition: background 0.2s;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.modal-btn:hover { background: var(--green); }
+
+.modal-legal {
+  font-size: 11px;
+  color: var(--ink-light);
+  margin-top: 14px;
+  line-height: 1.6;
+  text-align: center;
+}
+.modal-legal a { color: var(--green); text-decoration: none; }
+
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: 32px;
+  right: 32px;
+  background: var(--green);
+  color: white;
+  padding: 14px 24px;
+  font-size: 14px;
+  font-family: var(--font-body);
+  z-index: 9999;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.3s, transform 0.3s;
+  pointer-events: none;
+}
+.toast.show { opacity: 1; transform: translateY(0); }
+
+/* Divider line */
+.h-line {
+  height: 1px;
+  background: var(--border);
+  margin: 0 64px;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  nav { padding: 20px 24px; }
+  .nav-links { display: none; }
+  section, #book, footer { padding: 80px 24px; }
+  #hero { padding: 100px 24px 64px; }
+  .hero-stats { position: static; margin-top: 48px; }
+  .gap-grid, .framework-grid { grid-template-columns: 1fr; }
+  .case-layers, .icp-grid { grid-template-columns: 1fr; }
+  .footer-grid { grid-template-columns: 1fr; gap: 32px; }
+  .h-line { margin: 0 24px; }
+  .case-kpis { grid-template-columns: 1fr 1fr; }
+  .form-row { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+
+<body>
+
+<!-- NAV -->
+<nav id="navbar">
+  <a href="#" class="nav-logo">Clariva</a>
+  <ul class="nav-links">
+    <li><a href="#process">How It Works</a></li>
+    <li><a href="#framework">Framework</a></li>
+    <li><a href="#cases">Case Studies</a></li>
+    <li><a href="#faq">FAQs</a></li>
+    <li><a href="#book" class="nav-cta">Book Free Diagnostic</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-label">Marketing Diagnostic Advisory · D2C Founders</div>
+  <h1 class="hero-headline">
+    Find the break.<br>
+    Fix the <em>right</em> thing.
+  </h1>
+  <p class="hero-sub">
+    Most D2C brands between ₹2L–₹10L/month don't have an execution problem. They have a diagnostic problem. Clariva identifies the exact bottleneck preventing your growth — before recommending a single strategy.
+  </p>
+  <div class="hero-actions">
+    <a href="#book" class="btn-primary">Book Free Diagnostic</a>
+    <a href="#cases" class="btn-secondary">See Our Case Studies</a>
+  </div>
+  <div class="hero-stats">
+    <div>
+      <span class="hero-stat-num display">11</span>
+      <span class="hero-stat-label">Diagnostic<br>Layers</span>
+    </div>
+    <div>
+      <span class="hero-stat-num display">30</span>
+      <span class="hero-stat-label">Day Action<br>Plan</span>
+    </div>
+    <div>
+      <span class="hero-stat-num display">1</span>
+      <span class="hero-stat-label">Precise<br>Bottleneck</span>
+    </div>
+  </div>
+</section>
+
+<!-- THE GAP -->
+<section id="gap">
+  <div class="section-header reveal">
+    <span class="section-num">01</span>
+    <h2 class="section-title">The diagnostic <em>gap</em> most founders fall into</h2>
+  </div>
+  <div class="gap-grid">
+    <div class="gap-cell reveal reveal-delay-1">
+      <div class="gap-cell-icon">↑</div>
+      <div class="gap-cell-title display">More spend. Same result.</div>
+      <div class="gap-cell-text">You increase the ad budget. Try a new channel. Hire an influencer. Revenue barely moves. The response to a plateau shouldn't be to do more — it should be to understand why the plateau exists.</div>
+    </div>
+    <div class="gap-cell reveal reveal-delay-2">
+      <div class="gap-cell-icon">≈</div>
+      <div class="gap-cell-title display">Generic advice. Specific problem.</div>
+      <div class="gap-cell-text">Most marketing advice is designed for the average brand. Your brand isn't average — it has a specific constraint that's specific to your funnel, your customers, and your current stage. Generic advice doesn't find specific breaks.</div>
+    </div>
+    <div class="gap-cell reveal reveal-delay-3">
+      <div class="gap-cell-icon">?</div>
+      <div class="gap-cell-title display">Execution without diagnosis.</div>
+      <div class="gap-cell-text">Agencies execute. Freelancers create. But nobody maps the system first. Clariva operates exclusively in the thinking layer — diagnosing the exact constraint before any execution decision is made.</div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="process">
+  <div class="section-header reveal">
+    <span class="section-num">02</span>
+    <h2 class="section-title">How <em>Clariva</em> works</h2>
+  </div>
+  <div class="process-steps reveal">
+    <div class="process-step">
+      <div class="step-num display">1</div>
+      <div class="step-body">
+        <div class="step-label">Discovery</div>
+        <div class="step-title display">The Diagnostic Conversation</div>
+        <div class="step-desc">A structured 45-minute conversation using the PACTE framework — moving from surface symptoms to system mapping to where founder assumptions diverge from data. We find the real question before we look for answers.</div>
+      </div>
+      <div class="step-output">
+        <div class="step-output-label">Output</div>
+        <div class="step-output-val">System map + key hypotheses</div>
+      </div>
+    </div>
+    <div class="process-step">
+      <div class="step-num display">2</div>
+      <div class="step-body">
+        <div class="step-label">Analysis</div>
+        <div class="step-title display">The 11-Layer Diagnostic</div>
+        <div class="step-desc">We run your marketing system through 11 structured layers — from funnel mapping and channel economics to narrative coherence, customer voice, pricing architecture, and constraint mapping. Evidence-based, not assumed.</div>
+      </div>
+      <div class="step-output">
+        <div class="step-output-label">Output</div>
+        <div class="step-output-val">Layer-by-layer findings</div>
+      </div>
+    </div>
+    <div class="process-step">
+      <div class="step-num display">3</div>
+      <div class="step-body">
+        <div class="step-label">Diagnosis</div>
+        <div class="step-title display">The Growth Diagnostic Report</div>
+        <div class="step-desc">A structured report identifying the single bottleneck constraining your growth. Evidence, system map, failure mode identification, and strategic implication — all in a format designed to be read in 20 minutes and acted on immediately.</div>
+      </div>
+      <div class="step-output">
+        <div class="step-output-label">Output</div>
+        <div class="step-output-val">The Diagnostic Report</div>
+      </div>
+    </div>
+    <div class="process-step">
+      <div class="step-num display">4</div>
+      <div class="step-body">
+        <div class="step-label">Intervention</div>
+        <div class="step-title display">The 30-Day Action Plan</div>
+        <div class="step-desc">A tiered, sequenced plan built from the diagnostic findings. Week 1 quick wins. Weeks 2–3 core intervention. Week 4 foundation building. Every recommendation scored on impact, effort, and time-to-result. Constraint-aware — built for what you can actually execute.</div>
+      </div>
+      <div class="step-output">
+        <div class="step-output-label">Output</div>
+        <div class="step-output-val">Sequenced action plan</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FRAMEWORK -->
+<section id="framework">
+  <div class="section-header reveal">
+    <span class="section-num">03</span>
+    <h2 class="section-title">The <em>11-Layer</em> Diagnostic Framework</h2>
+  </div>
+  <p class="framework-intro reveal">Every engagement is run through the same structured architecture — ensuring no layer of the marketing system is assumed, and the bottleneck is found through evidence, not intuition.</p>
+
+  <div class="framework-grid reveal">
+    <div class="fw-phase-label">Phase A — Context</div>
+    <div class="fw-card">
+      <div class="fw-num">L-01</div>
+      <div class="fw-title display">Founder Mental Model Audit</div>
+      <div class="fw-desc">Maps what leadership believes is true about their customers, their market, and what's working. The gap between belief and data is where the most valuable insight lives.</div>
+    </div>
+    <div class="fw-card" style="grid-column: span 2;"></div>
+
+    <div class="fw-phase-label">Phase B — Data Layers</div>
+    <div class="fw-card">
+      <div class="fw-num">L-02</div>
+      <div class="fw-title display">Baseline Benchmarks</div>
+      <div class="fw-desc">Where does this brand sit relative to category norms on key metrics?</div>
+    </div>
+    <div class="fw-card">
+      <div class="fw-num">L-03</div>
+      <div class="fw-title display">Funnel Mapping</div>
+      <div class="fw-desc">Where is volume dropping off between awareness, consideration, and purchase?</div>
+    </div>
+    <div class="fw-card">
+      <div class="fw-num">L-04</div>
+      <div class="fw-title display">Cohort Thinking</div>
+      <div class="fw-desc">How do customers acquired in different periods behave differently over time?</div>
+    </div>
+    <div class="fw-card">
+      <div class="fw-num">L-05</div>
+      <div class="fw-title display">Channel Attribution</div>
+      <div class="fw-desc">Which channels are actually driving revenue versus consuming budget?</div>
+    </div>
+    <div class="fw-card">
+      <div class="fw-num">L-06</div>
+      <div class="fw-title display">Revenue Concentration</div>
+      <div class="fw-desc">How dependent is the business on a small number of products, customers, or channels?</div>
+    </div>
+    <div class="fw-card">
+      <div class="fw-num">L-07</div>
+      <div class="fw-title display">Narrative Coherence</div>
+      <div class="fw-desc">Is the brand saying a consistent, distinctive thing from ad to landing page to product to post-purchase?</div>
+    </div>
+    <div class="fw-card">
+      <div class="fw-num">L-08</div>
+      <div class="fw-title display">Customer Voice Analysis</div>
+      <div class="fw-desc">What are customers actually saying — and what does it contradict in the founder's assumptions?</div>
+    </div>
+    <div class="fw-card">
+      <div class="fw-num">L-09</div>
+      <div class="fw-title display">Pricing Architecture</div>
+      <div class="fw-desc">Is the pricing structure supporting or undermining acquisition and retention?</div>
+    </div>
+
+    <div class="fw-phase-label">Phase C — Synthesis</div>
+    <div class="fw-card">
+      <div class="fw-num">L-10</div>
+      <div class="fw-title display">Constraint Mapping</div>
+      <div class="fw-desc">What can this founder actually change given their current resources, team size, and cash position?</div>
+    </div>
+    <div class="fw-card">
+      <div class="fw-num">L-11</div>
+      <div class="fw-title display">Blind Spot Identification</div>
+      <div class="fw-desc">What was the founder confidently wrong about? The highest-value insight — framed as revelation, not correction.</div>
+    </div>
+    <div class="fw-card">
+      <div class="fw-num">L-12</div>
+      <div class="fw-title display">Category-Capability Fit</div>
+      <div class="fw-desc">For brands considering expansion: does this brand have the right to win in the new category on the dimensions that actually drive purchase there?</div>
+    </div>
+  </div>
+</section>
+
+<!-- CASE STUDIES -->
+<section id="cases">
+  <div class="section-header reveal">
+    <span class="section-num">04</span>
+    <h2 class="section-title">The framework <em>applied</em></h2>
+  </div>
+  <p class="cases-intro reveal">Two public case studies. Two different failure modes. The same diagnostic framework — showing how it surfaces different root causes for different situations.</p>
+
+  <!-- Case 1: Mamaearth -->
+  <div class="case-card reveal" id="case-mamaearth">
+    <div class="case-header" onclick="toggleCase('case-mamaearth')">
+      <div>
+        <div class="case-tag">Case Study 01 · D2C Personal Care · FY2020–2025</div>
+        <div class="case-title display">Mamaearth</div>
+        <div class="case-subtitle display">When ₹744 Crore in Marketing Isn't Enough</div>
+      </div>
+      <div class="case-toggle">
+        <span>View Analysis</span>
+        <span class="arrow">+</span>
+      </div>
+    </div>
+    <div class="case-body">
+      <div class="case-kpis">
+        <div class="kpi-cell">
+          <span class="kpi-num display">17×</span>
+          <span class="kpi-label">Revenue<br>Growth FY20–25</span>
+        </div>
+        <div class="kpi-cell highlight">
+          <span class="kpi-num display red">39%</span>
+          <span class="kpi-label">Ad Spend as<br>% of Revenue FY25</span>
+        </div>
+        <div class="kpi-cell highlight">
+          <span class="kpi-num display red">7.7%</span>
+          <span class="kpi-label">Revenue Growth<br>FY25</span>
+        </div>
+        <div class="kpi-cell">
+          <span class="kpi-num display">480</span>
+          <span class="kpi-label">Simultaneous<br>Meta Ads</span>
+        </div>
+      </div>
+
+      <div class="case-finding">
+        <div class="finding-label">Primary Bottleneck · Retention</div>
+        <div class="finding-text">Mamaearth built a world-class customer acquisition machine and a near-absent retention engine. <strong>Marketing spend held at 37–42% of revenue across six years</strong> despite revenue growing 17×. In a brand building genuine equity, that percentage should decline as repeat customers reduce acquisition burden. It never did. Industry benchmark: 15–20%. Mamaearth: double that, every year.</div>
+      </div>
+
+      <div class="case-layers">
+        <div class="layer-item">
+          <div class="layer-title">L-01 · Founder Mental Model</div>
+          <div class="layer-finding">Leadership believed the digital-first, influencer-led playbook was a <strong>durable competitive advantage</strong>. The data showed it was a market-condition advantage — one that eroded as CPMs rose, competitors copied the positioning, and offer-acquired customers didn't return at full price.</div>
+        </div>
+        <div class="layer-item">
+          <div class="layer-title">L-07 · Narrative Coherence</div>
+          <div class="layer-finding"><strong>122 SKUs launched in a single year</strong> in response to competitors copying the "natural/toxin-free" claim. CEO later acknowledged: "investment dispersed across 10 categories — too wide a dispersion." 480 simultaneous ads with no message hierarchy confirmed the fragmentation.</div>
+        </div>
+        <div class="layer-item">
+          <div class="layer-title">L-05 · Channel Attribution</div>
+          <div class="layer-finding">Ad creative dominated by <strong>BOGO and discount offers</strong> — self-selecting for price-sensitive customers who anchor to the offer price and don't return at full price. The acquisition was working. It was acquiring the wrong customer profile.</div>
+        </div>
+        <div class="layer-item">
+          <div class="layer-title">L-08 · Customer Voice</div>
+          <div class="layer-finding">Amazon reviews revealed <strong>packaging failures at scale</strong> — damaged products, leaking bottles — as acquisition volume exceeded fulfillment quality. ASCI flagged 187 Honasa ad violations in 2023, indicating influencer strategy scaled for volume without quality oversight.</div>
+        </div>
+      </div>
+
+      <div class="case-counterfactual">
+        <div class="cf-label">The Clariva Counterfactual · Intervention Point: FY22</div>
+        <div class="cf-text">"Your marketing spend is not declining as a percentage of revenue despite strong growth. You are renting attention, not building equity."</div>
+        <div class="cf-findings">
+          <div class="cf-finding-item">
+            <div class="cf-dot"></div>
+            <div class="cf-finding-text"><strong>Signal 1:</strong> Ad spend % flat at 42% despite revenue doubling — the brand is not compounding. Before scaling acquisition further, build one systematic retention mechanism.</div>
+          </div>
+          <div class="cf-finding-item">
+            <div class="cf-dot"></div>
+            <div class="cf-finding-text"><strong>Signal 2:</strong> Offer-driven creative is self-selecting for price-sensitive customers. Rebalance toward brand-value messaging even at short-term conversion cost.</div>
+          </div>
+          <div class="cf-finding-item">
+            <div class="cf-dot"></div>
+            <div class="cf-finding-text"><strong>Signal 3:</strong> Deepen positioning before widening portfolio. Differentiation is not owned until it's uncopiable.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Case 2: boAt -->
+  <div class="case-card reveal reveal-delay-2" id="case-boat">
+    <div class="case-header" onclick="toggleCase('case-boat')">
+      <div>
+        <div class="case-tag">Case Study 02 · Consumer Electronics D2C · FY2021–2025</div>
+        <div class="case-title display">boAt</div>
+        <div class="case-subtitle display">When Brand Loyalty Meets the Wrong Category</div>
+      </div>
+      <div class="case-toggle">
+        <span>View Analysis</span>
+        <span class="arrow">+</span>
+      </div>
+    </div>
+    <div class="case-body">
+      <div class="case-kpis">
+        <div class="kpi-cell">
+          <span class="kpi-num display green">8 yrs</span>
+          <span class="kpi-label">Consecutive<br>Profitable Years</span>
+        </div>
+        <div class="kpi-cell highlight">
+          <span class="kpi-num display red">4.3×</span>
+          <span class="kpi-label">Ad Spend Increase<br>FY22 → FY23</span>
+        </div>
+        <div class="kpi-cell highlight">
+          <span class="kpi-num display red">−40%</span>
+          <span class="kpi-label">Wearables Revenue<br>FY24</span>
+        </div>
+        <div class="kpi-cell">
+          <span class="kpi-num display red">28%</span>
+          <span class="kpi-label">Repeat Purchase<br>Rate (vs 40–50% norm)</span>
+        </div>
+      </div>
+
+      <div class="case-finding">
+        <div class="finding-label">Primary Bottleneck · Category-Capability Fit Failure</div>
+        <div class="finding-text">boAt entered smartwatches using a marketing playbook that worked in audio but was structurally wrong for a feature-driven, ecosystem-dependent category. <strong>Ad spend jumped 4.3× in a single year</strong> while revenue grew only 18% — forcing trial in a category where the brand had no earned trust on the dimensions that actually drove purchase. Eight years of profitability broken by one strategic decision made without a capability audit.</div>
+      </div>
+
+      <div class="case-layers">
+        <div class="layer-item">
+          <div class="layer-title">L-01 · Founder Mental Model</div>
+          <div class="layer-finding">Leadership believed the boAtheads community created <strong>transferable brand loyalty across categories</strong>. The data showed category-specific affinity. Audio buyers trusted boAt for affordable cool. Smartwatch buyers asked: health accuracy, battery life, OS quality — questions the brand couldn't answer.</div>
+        </div>
+        <div class="layer-item">
+          <div class="layer-title">L-12 · Category-Capability Fit</div>
+          <div class="layer-finding">Smartwatch purchase drivers: software quality, health sensor accuracy, app ecosystem. <strong>boAt's competitive advantage</strong> (affordable + cool + available) had zero overlap with these drivers. Noise built its own OS. Fire-Boltt added health sensors. boAt launched colour variants.</div>
+        </div>
+        <div class="layer-item">
+          <div class="layer-title">L-03 · Funnel Mapping</div>
+          <div class="layer-finding">Audio conversion: strong (75–80% of revenue). <strong>Smartwatch conversion: poor</strong> relative to spend — lifestyle messaging doesn't answer feature-driven purchase questions. Different category, different purchase logic, same messaging approach.</div>
+        </div>
+        <div class="layer-item">
+          <div class="layer-title">L-05 · Channel Economics</div>
+          <div class="layer-finding">FY23 hidden costs: <strong>13% discounts + 6% returns + ₹140 Cr warranty claims</strong> = near ₹900 Cr reduction from collections. Combined with 4.3× ad spend, the unit economics were structurally broken before operational costs.</div>
+        </div>
+      </div>
+
+      <div class="case-counterfactual">
+        <div class="cf-label">The Clariva Counterfactual · Intervention Point: Q3 FY22</div>
+        <div class="cf-text">"Before allocating capital to this category expansion — audit whether your competitive advantage is relevant to the dimensions that actually drive purchase in smartwatches."</div>
+        <div class="cf-findings">
+          <div class="cf-finding-item">
+            <div class="cf-dot"></div>
+            <div class="cf-finding-text"><strong>Signal 1:</strong> Repeat purchase rate at 28% — below benchmark. No loyal base exists to cross-sell into smartwatches. You will acquire new customers from zero, at full CAC, in a market where you have no established trust on the right dimensions.</div>
+          </div>
+          <div class="cf-finding-item">
+            <div class="cf-dot"></div>
+            <div class="cf-finding-text"><strong>Signal 2:</strong> Smartwatch purchase is driven by features and software, not lifestyle. Your current moat does not apply. Build capability first — then allocate marketing budget.</div>
+          </div>
+          <div class="cf-finding-item">
+            <div class="cf-dot"></div>
+            <div class="cf-finding-text"><strong>Signal 3:</strong> Service infrastructure is degrading at scale. Fix this before entering a new category where post-purchase service is the primary driver of repeat purchase.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WHO THIS IS FOR -->
+<section id="icp">
+  <div class="section-header reveal">
+    <span class="section-num">05</span>
+    <h2 class="section-title">Who Clariva is <em>built for</em></h2>
+  </div>
+  <div class="icp-grid">
+    <div class="icp-card reveal">
+      <div class="icp-title display">The right fit</div>
+      <ul class="icp-items">
+        <li>D2C brand doing ₹2L–₹10L/month with proven product demand</li>
+        <li>Spending on at least one paid channel with inconsistent or declining returns</li>
+        <li>Stuck at roughly the same revenue level for 3+ months despite active marketing effort</li>
+        <li>Making most marketing decisions yourself or with a small team</li>
+        <li>Receiving generic advice that hasn't moved the needle</li>
+        <li>Want to know exactly what's broken before spending another rupee on execution</li>
+      </ul>
+    </div>
+    <div class="icp-card reveal reveal-delay-2">
+      <div class="icp-title display">What Clariva is not</div>
+      <ul class="icp-items">
+        <li>Not a social media management agency — we don't post on your behalf</li>
+        <li>Not an ads management service — we don't run your campaigns</li>
+        <li>Not a content creation studio — we don't make your creatives</li>
+        <li>Not a branding agency — we don't redesign your identity</li>
+        <li>Not a 50-page strategy deck with no clear next step</li>
+        <li>Not generic advice that could apply to any brand — every diagnosis is specific</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq">
+  <div class="section-header reveal">
+    <span class="section-num">06</span>
+    <h2 class="section-title">Frequently asked <em>questions</em></h2>
+  </div>
+  <div class="faq-list reveal">
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        What exactly happens in the free diagnostic call?
+        <span class="faq-icon">+</span>
+      </div>
+      <div class="faq-a">
+        The diagnostic call is a structured 45-minute conversation. We use the PACTE framework to move through five levels — from surface symptoms (what you say is wrong) to system mapping (how your marketing actually works) to divergence (where your assumptions don't match data) to constraints (what you can and can't change) to evidence (what data actually exists). We don't pitch during this call. By the end, you'll have clarity on what the real problem is — regardless of whether you proceed to a paid engagement.
+      </div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        Is the diagnosis actually free? What's the catch?
+        <span class="faq-icon">+</span>
+      </div>
+      <div class="faq-a">
+        The diagnostic conversation and the identification of your primary bottleneck are genuinely free. No hidden fees, no surprise invoices. <strong>If you want the full written Diagnostic Report and the 30-Day Action Plan</strong> — the structured document with evidence, system map, and sequenced recommendations — that is a paid engagement. The free diagnosis surfaces the problem. The paid strategy provides the complete, documented roadmap to resolve it.
+      </div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        How is Clariva different from a marketing agency?
+        <span class="faq-icon">+</span>
+      </div>
+      <div class="faq-a">
+        Three structural differences. <strong>Incentive alignment:</strong> Agencies make money by executing, so they're incentivised to recommend execution regardless of whether it's the right priority. Clariva makes money by diagnosing — the incentive is always to find the real problem. <strong>Specificity:</strong> Agencies give general strategies; Clariva gives a specific diagnosis of a specific bottleneck with specific evidence. <strong>Stage fit:</strong> Most agencies are built for brands that know what they need. Clariva is built for brands that don't yet know what they need — which is most brands at ₹2–10L/month.
+      </div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        What does the Diagnostic Report actually look like?
+        <span class="faq-icon">+</span>
+      </div>
+      <div class="faq-a">
+        The report contains seven sections: Executive Diagnosis (the single bottleneck constraining growth), Evidence and Analysis (data and observations supporting the diagnosis), Marketing System Map (how acquisition, conversion, and retention interact in your specific business), Failure Mode Identification (which structural pattern your brand resembles), Strategic Implication (what the diagnosis means for future decisions), 30-Day Intervention Plan (prioritised actions sequenced by impact and effort), and Key Metrics to Monitor (specific indicators showing whether the bottleneck is resolving).
+      </div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        How long does the full diagnostic process take?
+        <span class="faq-icon">+</span>
+      </div>
+      <div class="faq-a">
+        The discovery call is 45 minutes. Data analysis and report writing typically takes 3–5 business days depending on data availability and business complexity. The full written report and action plan are delivered within one week of the discovery call. A walkthrough call is included to discuss the findings in detail.
+      </div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        What if I want help implementing the recommendations?
+        <span class="faq-icon">+</span>
+      </div>
+      <div class="faq-a">
+        The 30-Day Action Plan is designed to be implementable by you or your team without additional external help. Each recommendation is scoped to your current resource constraints — this is the Constraint Mapping layer of the diagnostic. If specific implementation support is needed, we can discuss that as a separate engagement. However, Clariva's core role is diagnostic and strategic — not execution.
+      </div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        What data do I need to share for the diagnostic?
+        <span class="faq-icon">+</span>
+      </div>
+      <div class="faq-a">
+        The more data available, the more precise the diagnosis. Useful data includes: monthly revenue and ad spend, channel-level ROAS or performance data, customer acquisition numbers, repeat purchase rate (if tracked), any customer feedback or review data, and access to your Meta/Google ad account for a 30-minute review. If you don't have all of this, the diagnostic still works — the framework is designed to identify what's missing and what that absence itself signals. All data shared is handled under our Privacy Policy and Client Agreement.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BOOKING -->
+<section id="book">
+  <div class="book-label">Free for D2C Founders · ₹2L–₹10L/Month</div>
+  <h2 class="book-headline display">Stop guessing.<br>Start <em>diagnosing.</em></h2>
+  <p class="book-sub">Book a free 45-minute diagnostic conversation. No pitch. No generic advice. Just a structured conversation about what's actually constraining your growth.</p>
+
+  <form class="book-form" onsubmit="handleSubmit(event)">
+    <div class="form-row">
+      <input type="text" class="form-input" placeholder="Your name" required>
+      <input type="email" class="form-input" placeholder="Email address" required>
+    </div>
+    <input type="text" class="form-input" placeholder="Brand name" required>
+    <select class="form-select">
+      <option value="" disabled selected>Monthly revenue range</option>
+      <option>₹50,000 – ₹2,00,000</option>
+      <option>₹2,00,000 – ₹5,00,000</option>
+      <option>₹5,00,000 – ₹10,00,000</option>
+      <option>₹10,00,000+</option>
+    </select>
+    <textarea class="form-textarea" placeholder="In one sentence — what's the marketing problem you're trying to solve?" required></textarea>
+    <button type="submit" class="btn-submit">Book Free Diagnostic Call</button>
+    <p class="book-note">By submitting, you agree to our <a href="#" onclick="openModal('terms')" style="color:rgba(255,255,255,0.4)">Terms</a> & <a href="#" onclick="openModal('privacy')" style="color:rgba(255,255,255,0.4)">Privacy Policy</a></p>
+  </form>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div>
+      <div class="footer-logo">Clariva</div>
+      <div class="footer-tagline">Marketing Diagnostic Advisory for D2C Founders. Diagnosis before prescription. Always.</div>
+    </div>
+    <div>
+      <div class="footer-col-title">Navigation</div>
+      <ul class="footer-links">
+        <li><a href="#process">How It Works</a></li>
+        <li><a href="#framework">Our Framework</a></li>
+        <li><a href="#cases">Case Studies</a></li>
+        <li><a href="#icp">Who It's For</a></li>
+        <li><a href="#faq">FAQs</a></li>
+        <li><a href="#book">Book a Call</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-col-title">Legal</div>
+      <ul class="footer-links">
+        <li><a href="#" onclick="openModal('terms')">Terms & Conditions</a></li>
+        <li><a href="#" onclick="openModal('privacy')">Privacy Policy</a></li>
+        <li><a href="#" onclick="openModal('agreement')">Client Agreement</a></li>
+      </ul>
+      <div class="footer-col-title" style="margin-top:24px">Contact</div>
+      <ul class="footer-links">
+        <li><a href="mailto:hello@clariva.in">hello@clariva.in</a></li>
+        <li><a href="https://linkedin.com/company/clariva" target="_blank">LinkedIn</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2025 Clariva. All rights reserved.</span>
+    <span>Marketing Diagnostic Advisory · India</span>
+  </div>
+</footer>
+
+<!-- LEGAL MODALS -->
+<div class="modal-overlay" id="modal-terms">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('terms')">×</button>
+    <div class="modal-title display">Terms & Conditions</div>
+    <div class="modal-sub">Last updated: January 2025</div>
+    <div style="font-size:13px;color:#555;line-height:1.8;max-height:50vh;overflow-y:auto;">
+      <p style="margin-bottom:12px"><strong>1. Services</strong><br>Clariva provides marketing diagnostic and advisory services. All engagements are governed by a separate Client Agreement signed prior to commencement of paid work.</p>
+      <p style="margin-bottom:12px"><strong>2. Free Diagnostic</strong><br>The initial diagnostic conversation is provided at no charge. This includes the discovery call and verbal identification of the primary growth constraint. Written reports, action plans, and follow-up engagements are paid services.</p>
+      <p style="margin-bottom:12px"><strong>3. Intellectual Property</strong><br>All frameworks, methodologies, reports, and materials produced by Clariva remain the intellectual property of Clariva. Clients receive a license to use deliverables for their own business purposes only.</p>
+      <p style="margin-bottom:12px"><strong>4. Confidentiality</strong><br>Clariva treats all client business information as strictly confidential. Client data is not shared with third parties without explicit consent.</p>
+      <p style="margin-bottom:12px"><strong>5. Accuracy of Information</strong><br>Recommendations are based on information provided by the client. Clariva is not responsible for outcomes resulting from inaccurate or incomplete data provided during the engagement.</p>
+      <p style="margin-bottom:12px"><strong>6. Limitation of Liability</strong><br>Clariva's liability is limited to the fees paid for the specific engagement. Clariva does not guarantee specific business outcomes from diagnostic recommendations.</p>
+      <p style="margin-bottom:12px"><strong>7. Governing Law</strong><br>These terms are governed by the laws of India. Any disputes shall be subject to the jurisdiction of courts in India.</p>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-privacy">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('privacy')">×</button>
+    <div class="modal-title display">Privacy Policy</div>
+    <div class="modal-sub">Last updated: January 2025</div>
+    <div style="font-size:13px;color:#555;line-height:1.8;max-height:50vh;overflow-y:auto;">
+      <p style="margin-bottom:12px"><strong>1. Information We Collect</strong><br>We collect information you provide directly: name, email, brand name, revenue range, and the problem statement you share when booking a diagnostic call.</p>
+      <p style="margin-bottom:12px"><strong>2. How We Use Your Information</strong><br>Information is used solely to: conduct the diagnostic engagement, send relevant communications about your engagement, and improve our diagnostic methodology. We do not use your data for advertising or sell it to third parties.</p>
+      <p style="margin-bottom:12px"><strong>3. Business Data Shared During Engagements</strong><br>Business data shared during diagnostic engagements (revenue figures, ad spend, customer data) is used exclusively for the purpose of the diagnostic. It is stored securely and deleted upon request or after 24 months.</p>
+      <p style="margin-bottom:12px"><strong>4. Case Studies</strong><br>We may use anonymised insights from engagements to develop our methodology. No client is identifiable in any published material without explicit written consent.</p>
+      <p style="margin-bottom:12px"><strong>5. Data Security</strong><br>We implement appropriate technical and organisational measures to protect your information against unauthorised access, alteration, or disclosure.</p>
+      <p style="margin-bottom:12px"><strong>6. Your Rights</strong><br>You have the right to access, correct, or request deletion of any personal data we hold. Contact hello@clariva.in for any data requests.</p>
+      <p style="margin-bottom:12px"><strong>7. Contact</strong><br>For privacy-related questions: hello@clariva.in</p>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-agreement">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('agreement')">×</button>
+    <div class="modal-title display">Client Agreement Overview</div>
+    <div class="modal-sub">A full Client Agreement is provided and signed before any paid engagement begins.</div>
+    <div style="font-size:13px;color:#555;line-height:1.8;max-height:50vh;overflow-y:auto;">
+      <p style="margin-bottom:12px"><strong>Scope of Services</strong><br>Each engagement defines a specific scope — the diagnostic conversation, the written report, and/or the 30-day action plan. Work outside the agreed scope requires a separate agreement.</p>
+      <p style="margin-bottom:12px"><strong>Payment Terms</strong><br>Payment is due before commencement of the paid engagement. Accepted via bank transfer or UPI. Receipts provided for all payments.</p>
+      <p style="margin-bottom:12px"><strong>Deliverables & Timeline</strong><br>Written reports are delivered within 5–7 business days of the discovery call. Timeline may vary based on data availability.</p>
+      <p style="margin-bottom:12px"><strong>Revisions</strong><br>One round of clarification questions is included post-delivery. Substantive re-analysis requires a new engagement.</p>
+      <p style="margin-bottom:12px"><strong>Confidentiality (Both Parties)</strong><br>Clariva will not disclose client business information. The client will not reproduce or share Clariva's frameworks or deliverables commercially without written permission.</p>
+      <p style="margin-bottom:12px"><strong>Cancellation</strong><br>Paid engagements may be cancelled within 24 hours of payment for a full refund. Cancellations after work has commenced are non-refundable.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">✓ Received. We'll be in touch within 24 hours.</div>
+
+<script>
+// Navbar scroll
+window.addEventListener('scroll', () => {
+  document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 40);
+});
+
+// Scroll reveal
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); } });
+}, { threshold: 0.1 });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// Case toggle
+function toggleCase(id) {
+  const card = document.getElementById(id);
+  card.classList.toggle('open');
+}
+
+// FAQ toggle
+function toggleFaq(el) {
+  const item = el.parentElement;
+  const wasOpen = item.classList.contains('open');
+  document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+  if (!wasOpen) item.classList.add('open');
+}
+
+// Modal
+function openModal(type) {
+  document.getElementById('modal-' + type).classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeModal(type) {
+  document.getElementById('modal-' + type).classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', (e) => {
+    if (e.target === m) {
+      m.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+  });
+});
+
+// Form submit
+function handleSubmit(e) {
+  e.preventDefault();
+  const toast = document.getElementById('toast');
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 4000);
+  e.target.reset();
+}
+
+// Smooth scroll for nav links
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    const target = document.querySelector(a.getAttribute('href'));
+    if (target) { e.preventDefault(); target.scrollIntoView({ behavior: 'smooth' }); }
+  });
+});
+</script>
+
+</body>
+</html>
